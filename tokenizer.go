@@ -71,6 +71,28 @@ func (t *tokenizer) next() token {
 	return token{tokenType: haveType, text: string(t.code[start:t.cur])}
 }
 
+// findClosingBrace is an optimization for reading binary data. They are written
+// as hex characters like this:
+//
+//     Bitmap.Data = {
+//       ABCDEF0123456789
+//       ABCDEF0123456789
+//       ABCDEF0123456789}
+//
+// which would be tokenized to integers and words. Since binary data is the
+// largest part of a typical DFM, this function allows the parser to process
+// this much quicker than re-combining integers and words.
+func (t *tokenizer) findClosingBrace() []rune {
+	for i := t.cur; i < len(t.code); i++ {
+		if t.code[i] == '}' {
+			part := t.code[t.cur:i]
+			t.cur = i
+			return part
+		}
+	}
+	return nil
+}
+
 func (t *tokenizer) currentRune() rune {
 	if t.cur < len(t.code) {
 		return t.code[t.cur]

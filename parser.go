@@ -8,23 +8,14 @@ import (
 )
 
 func newParser(code string) *parser {
-	var tokens []token
-	tokenize := tokenizer{code: []rune(code)}
-	for {
-		t := tokenize.next()
-		if t.tokenType == tokenEOF {
-			break
-		}
-		if t.tokenType != tokenWhiteSpace {
-			tokens = append(tokens, t)
-		}
-	}
-	return &parser{tokens: tokens}
+	return &parser{tokens: tokenizer{code: []rune(code)}}
 }
 
 type parser struct {
-	tokens []token
-	err    error
+	tokens          tokenizer
+	previewToken    token
+	hasPreviewToken bool
+	err             error
 }
 
 func (p *parser) parseObject() (Object, error) {
@@ -154,37 +145,39 @@ func (p *parser) parseValue() PropertyValue {
 		return tuple
 	case '{':
 		p.nextToken()
-		var s string
-		for {
-			t := p.nextToken()
-			if t.tokenType == tokenEOF {
-				p.err = errors.New("premature EOF in bytes")
-				return nil
-			}
-			if t.tokenType == '}' {
-				break
-			}
-			if t.tokenType == tokenInteger || t.tokenType == tokenWord {
-				s += t.text
-			} else {
-				p.err = errors.New("hexadecimal bytes or } expected but was " + t.String())
-				return nil
+		code := p.tokens.findClosingBrace()
+		p.token('}')
+
+		// Copy all hex bytes to the start of code.
+		hex := func(r rune) bool {
+			return '0' <= r && r <= '9' ||
+				'A' <= r && r <= 'F' ||
+				'a' <= r && r <= 'f'
+		}
+		n := 0
+		for i := range code {
+			if hex(code[i]) {
+				code[n] = code[i]
+				n++
 			}
 		}
+		code = code[:n]
 
-		b := make([]byte, len(s)/2)
-		unHex := func(b byte) byte {
+		// Convert all ASCII hex pairs to bytes.
+		b := make([]byte, len(code)/2)
+		unHex := func(b rune) byte {
 			if '0' <= b && b <= '9' {
-				return b - '0'
+				return byte(b) - '0'
 			}
 			if 'a' <= b && b <= 'f' {
-				return 10 + b - 'a'
+				return 10 + byte(b) - 'a'
 			}
-			return 10 + b - 'A'
+			return 10 + byte(b) - 'A'
 		}
 		for i := range b {
-			b[i] = unHex(s[i*2])<<4 | unHex(s[i*2+1])
+			b[i] = unHex(code[i*2])<<4 | unHex(code[i*2+1])
 		}
+
 		return Bytes(b)
 	case tokenWord:
 		t := p.nextToken()
@@ -240,10 +233,17 @@ func (p *parser) token(typ tokenType) {
 }
 
 func (p *parser) peekToken() token {
-	if p.err != nil || len(p.tokens) == 0 {
+	if p.err != nil {
 		return token{tokenType: tokenEOF}
 	}
-	return p.tokens[0]
+	if !p.hasPreviewToken {
+		p.previewToken = p.tokens.next()
+		for p.previewToken.tokenType == tokenWhiteSpace {
+			p.previewToken = p.tokens.next()
+		}
+		p.hasPreviewToken = true
+	}
+	return p.previewToken
 }
 
 func (p *parser) peeksAt(typ tokenType) bool {
@@ -251,16 +251,19 @@ func (p *parser) peeksAt(typ tokenType) bool {
 }
 
 func (p *parser) nextToken() token {
-	if p.err != nil || len(p.tokens) == 0 {
+	if p.err != nil {
 		return token{tokenType: tokenEOF}
 	}
-
-	t := p.tokens[0]
-	p.tokens = p.tokens[1:]
-
+	if p.hasPreviewToken {
+		p.hasPreviewToken = false
+		return p.previewToken
+	}
+	t := p.tokens.next()
+	for t.tokenType == tokenWhiteSpace {
+		t = p.tokens.next()
+	}
 	if t.tokenType == tokenIllegal {
 		p.err = fmt.Errorf("Illegal token encountered: %q", t.text)
 	}
-
 	return t
 }
