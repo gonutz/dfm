@@ -2,9 +2,19 @@ package dfm
 
 import "unicode"
 
+func newTokenizer(code []rune) tokenizer {
+	return tokenizer{
+		code: code,
+		line: 1,
+		col:  1,
+	}
+}
+
 type tokenizer struct {
 	code []rune
 	cur  int
+	line int
+	col  int
 }
 
 func (t *tokenizer) next() token {
@@ -15,10 +25,16 @@ func (t *tokenizer) next() token {
 		return '0' <= r && r <= '9'
 	}
 
+	line, col := t.line, t.col
 	r := t.currentRune()
 	switch r {
 	case 0:
-		return token{tokenType: tokenEOF, text: "end of file"}
+		return token{
+			tokenType: tokenEOF,
+			text:      "end of file",
+			line:      line,
+			col:       col,
+		}
 	case '+', '-', '[', ']', '(', ')', '{', '}', '<', '>', '=', ':', '.', ',':
 		t.nextRune()
 		haveType = tokenType(r)
@@ -68,7 +84,12 @@ func (t *tokenizer) next() token {
 		}
 	}
 
-	return token{tokenType: haveType, text: string(t.code[start:t.cur])}
+	return token{
+		tokenType: haveType,
+		text:      string(t.code[start:t.cur]),
+		line:      line,
+		col:       col,
+	}
 }
 
 // findClosingBrace is an optimization for reading binary data. They are written
@@ -102,6 +123,12 @@ func (t *tokenizer) currentRune() rune {
 
 func (t *tokenizer) nextRune() rune {
 	if t.cur < len(t.code) {
+		if t.code[t.cur] == '\n' {
+			t.line++
+			t.col = 1
+		} else {
+			t.col++
+		}
 		t.cur++
 	}
 	return t.currentRune()

@@ -5,6 +5,8 @@ import "fmt"
 type token struct {
 	tokenType tokenType
 	text      string
+	// line and col both start at 1.
+	line, col int
 }
 
 // tokenType is a rune because single characters are used directly as their
@@ -23,7 +25,7 @@ const (
 )
 
 func (t token) String() string {
-	return fmt.Sprintf("%v: %q", t.tokenType, t.text)
+	return fmt.Sprintf("%v: %q at %d:%d", t.tokenType, t.text, t.line, t.col)
 }
 
 func (t tokenType) String() string {

@@ -1,6 +1,10 @@
 package dfm
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/gonutz/check"
+)
 
 func TestTokenize(t *testing.T) {
 	checkTokens(t,
@@ -68,6 +72,55 @@ end`,
 	)
 }
 
+func TestTokenPositions(t *testing.T) {
+	tokens := tokenize(`object X
+  Left
+end`)
+	check.Eq(t, len(tokens), 7)
+	check.Eq(t, tokens[0], token{
+		tokenType: tokenWord,
+		text:      "object",
+		line:      1,
+		col:       1,
+	})
+	check.Eq(t, tokens[1], token{
+		tokenType: tokenWhiteSpace,
+		text:      " ",
+		line:      1,
+		col:       7,
+	})
+	check.Eq(t, tokens[2], token{
+		tokenType: tokenWord,
+		text:      "X",
+		line:      1,
+		col:       8,
+	})
+	check.Eq(t, tokens[3], token{
+		tokenType: tokenWhiteSpace,
+		text:      "\n  ",
+		line:      1,
+		col:       9,
+	})
+	check.Eq(t, tokens[4], token{
+		tokenType: tokenWord,
+		text:      "Left",
+		line:      2,
+		col:       3,
+	})
+	check.Eq(t, tokens[5], token{
+		tokenType: tokenWhiteSpace,
+		text:      "\n",
+		line:      2,
+		col:       7,
+	})
+	check.Eq(t, tokens[6], token{
+		tokenType: tokenWord,
+		text:      "end",
+		line:      3,
+		col:       1,
+	})
+}
+
 func tok(typ tokenType, text string) token {
 	return token{tokenType: typ, text: text}
 }
@@ -89,7 +142,7 @@ func checkTokens(t *testing.T, code string, want ...token) {
 }
 
 func tokenize(code string) []token {
-	lex := tokenizer{code: []rune(code)}
+	lex := newTokenizer([]rune(code))
 	var tokens []token
 	for {
 		if t := lex.next(); t.tokenType != tokenEOF {

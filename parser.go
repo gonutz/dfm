@@ -8,7 +8,7 @@ import (
 )
 
 func newParser(code string) *parser {
-	p := &parser{tokens: tokenizer{code: []rune(code)}}
+	p := &parser{tokens: newTokenizer([]rune(code))}
 	if len(code) > 0 && code[0] == 0xFF {
 		p.err = errors.New("dfm.Parse: binary DFM files are not supported")
 	}
