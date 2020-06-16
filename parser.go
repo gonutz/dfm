@@ -20,7 +20,12 @@ type parser struct {
 
 func (p *parser) parseObject() (Object, error) {
 	var obj Object
-	p.word("object")
+	if p.peekWord("inherited") {
+		p.word("inherited")
+		obj.Inherited = true
+	} else {
+		p.word("object")
+	}
 	obj.Name = p.identifier("object name")
 	p.token(':')
 	obj.Type = p.identifier("object type")
@@ -32,7 +37,7 @@ func (p *parser) parseObject() (Object, error) {
 
 		var prop Property
 
-		if p.peekWord("object") {
+		if p.peekWord("object") || p.peekWord("inherited") {
 			child, err := p.parseObject()
 			if err != nil {
 				return obj, err

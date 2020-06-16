@@ -33,7 +33,13 @@ func (p *printer) decIndent() {
 }
 
 func (p *printer) object(o Object) {
-	p.write(p.indent, "object ", o.Name, ": ", o.Type, "\r\n")
+	p.WriteString(p.indent)
+	if o.Inherited {
+		p.WriteString("inherited ")
+	} else {
+		p.WriteString("object ")
+	}
+	p.write(o.Name, ": ", o.Type, "\r\n")
 	p.incIndent()
 	for _, prop := range o.Properties {
 		if obj, ok := prop.Value.(Object); ok {

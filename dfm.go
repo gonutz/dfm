@@ -11,8 +11,11 @@ func Parse(code string) (Object, error) {
 // graphical element that can be defined in Delphi. It contains a list of
 // properties, which can include child objects as well.
 type Object struct {
-	Name       string
-	Type       string
+	Name string
+	Type string
+	// Inherited determines whether the keyword for the object is "object" or
+	// "inherited".
+	Inherited  bool
 	Properties []Property
 }
 

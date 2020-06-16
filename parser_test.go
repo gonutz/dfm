@@ -194,6 +194,18 @@ func TestParseFloatProperties(t *testing.T) {
 	)
 }
 
+func TestParseInheritedObject(t *testing.T) {
+	parseObject(t,
+		`inherited Dialog: TDialog
+end`,
+		dfm.Object{
+			Name:      "Dialog",
+			Type:      "TDialog",
+			Inherited: true,
+		},
+	)
+}
+
 func parseObject(t *testing.T, code string, want dfm.Object) {
 	t.Helper()
 	obj, err := dfm.Parse(code)
