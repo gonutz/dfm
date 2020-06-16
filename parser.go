@@ -40,9 +40,14 @@ func (p *parser) parseObject() (Object, error) {
 		obj.Kind = Inline
 	}
 
-	obj.Name = p.identifier("object name")
-	p.token(':')
-	obj.Type = p.identifier("object type")
+	nameOrType := p.identifier("object name (or type for anonymous objects)")
+	if p.peeksAt(':') {
+		obj.Name = nameOrType
+		p.token(':')
+		obj.Type = p.identifier("object type")
+	} else {
+		obj.Type = nameOrType
+	}
 
 	for p.err == nil {
 		if p.peekEOF() || p.peekWord("end") {

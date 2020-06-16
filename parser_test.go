@@ -268,6 +268,17 @@ func TestParseItemLists(t *testing.T) {
 	)
 }
 
+func TestParseAnonymousObject(t *testing.T) {
+	parseObject(t,
+		`object TMenuItem
+end`,
+		dfm.Object{
+			Name: "",
+			Type: "TMenuItem",
+		},
+	)
+}
+
 func parseObject(t *testing.T, code string, want dfm.Object) {
 	t.Helper()
 	obj, err := dfm.Parse(code)

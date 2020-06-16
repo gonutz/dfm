@@ -11,6 +11,10 @@ func Parse(code string) (Object, error) {
 // graphical element that can be defined in Delphi. It contains a list of
 // properties, which can include child objects as well.
 type Object struct {
+	// Name might be empty. In that case this is an anonymous object like
+	//
+	//     object TMenuItem
+	//       Caption = '...'
 	Name string
 	Type string
 	// Kind determines whether the keyword for the object is "object",

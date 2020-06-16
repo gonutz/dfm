@@ -33,7 +33,12 @@ func (p *printer) decIndent() {
 }
 
 func (p *printer) object(o Object) {
-	p.write(p.indent, o.Kind.String(), " ", o.Name, ": ", o.Type, "\r\n")
+	if o.Name == "" {
+		// Anonymous object.
+		p.write(p.indent, o.Kind.String(), " ", o.Type, "\r\n")
+	} else {
+		p.write(p.indent, o.Kind.String(), " ", o.Name, ": ", o.Type, "\r\n")
+	}
 	p.incIndent()
 	for _, prop := range o.Properties {
 		if obj, ok := prop.Value.(Object); ok {
