@@ -19,7 +19,7 @@ func (t *tokenizer) next() token {
 	switch r {
 	case 0:
 		return token{tokenType: tokenEOF, text: "end of file"}
-	case '+', '-', '[', ']', '(', ')', '{', '}', '=', ':', '.', ',':
+	case '+', '-', '[', ']', '(', ')', '{', '}', '<', '>', '=', ':', '.', ',':
 		t.nextRune()
 		haveType = tokenType(r)
 	case '\'':

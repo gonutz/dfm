@@ -13,15 +13,38 @@ func Parse(code string) (Object, error) {
 type Object struct {
 	Name string
 	Type string
-	// Inherited determines whether the keyword for the object is "object" or
-	// "inherited".
-	Inherited  bool
+	// Kind determines whether the keyword for the object is "object",
+	// "inherited" or "inline".
+	Kind       ObjectKind
 	Properties []Property
 }
 
+// ObjectKind represents the keyword used to define an object in the DFM.
+type ObjectKind int
+
+const (
+	// Plain objects have the keyword "object".
+	Plain ObjectKind = 0
+	// Inherited objects have the keyword "inherited".
+	Inherited ObjectKind = 1
+	// Inline objects have the keyword "inline".
+	Inline ObjectKind = 2
+)
+
+// String returns the lower-case keyword for the object kind.
+func (k ObjectKind) String() string {
+	if k == Inherited {
+		return "inherited"
+	} else if k == Inline {
+		return "inline"
+	} else {
+		return "object"
+	}
+}
+
 // Property is what is contained in an Object. Possible types are Int, Float,
-// Bool, String, Identifier, Set, Tuple, Bytes and Object. Except for Object,
-// these will appear in the DFM file as:
+// Bool, String, Identifier, Set, Tuple, Bytes, Items and Object. Except for
+// Object, these will appear in the DFM file as:
 //
 //     <name> = <value>
 //
@@ -76,6 +99,19 @@ type Tuple []PropertyValue
 //     { FFAC2938AA991234A }
 type Bytes []byte
 
+// Items is a list of property lists (2D list of properies) like
+//
+//     <
+//       item
+//         prop1 = 1
+//         prop2 = 2
+//       end
+//       item
+//         prop1 = 1
+//         prop2 = 2
+//       end>
+type Items [][]Property
+
 func (Object) isPropertyValue()     {}
 func (Int) isPropertyValue()        {}
 func (Float) isPropertyValue()      {}
@@ -85,3 +121,4 @@ func (Identifier) isPropertyValue() {}
 func (Set) isPropertyValue()        {}
 func (Tuple) isPropertyValue()      {}
 func (Bytes) isPropertyValue()      {}
+func (Items) isPropertyValue()      {}

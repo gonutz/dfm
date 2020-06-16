@@ -15,6 +15,7 @@ func TestTokenize(t *testing.T) {
   #32
   {123F}
   1.5
+  <>
 end`,
 		tok(tokenWord, "object"),
 		tok(tokenWhiteSpace, " "),
@@ -59,6 +60,9 @@ end`,
 		tok('}', "}"),
 		tok(tokenWhiteSpace, "\n  "),
 		tok(tokenFloat, "1.5"),
+		tok(tokenWhiteSpace, "\n  "),
+		tok('<', "<"),
+		tok('>', ">"),
 		tok(tokenWhiteSpace, "\n"),
 		tok(tokenWord, "end"),
 	)

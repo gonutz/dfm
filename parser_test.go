@@ -85,6 +85,13 @@ func TestParseIdentifierProperty(t *testing.T) {
 	)
 }
 
+func TestParseIdentifierWithDotsProperty(t *testing.T) {
+	parseProperties(t,
+		"Event = Device.Action",
+		dfm.Property{Name: "Event", Value: dfm.Identifier("Device.Action")},
+	)
+}
+
 func TestParseSetProperty(t *testing.T) {
 	parseProperties(t,
 		"Anchors = [akLeft, akTop, akRight]",
@@ -199,10 +206,65 @@ func TestParseInheritedObject(t *testing.T) {
 		`inherited Dialog: TDialog
 end`,
 		dfm.Object{
-			Name:      "Dialog",
-			Type:      "TDialog",
-			Inherited: true,
+			Name: "Dialog",
+			Type: "TDialog",
+			Kind: dfm.Inherited,
 		},
+	)
+}
+
+func TestParseInlineObject(t *testing.T) {
+	parseObject(t,
+		`inline Dialog: TDialog
+end`,
+		dfm.Object{
+			Name: "Dialog",
+			Type: "TDialog",
+			Kind: dfm.Inline,
+		},
+	)
+}
+
+func TestParseEmptyItemList(t *testing.T) {
+	parseProperties(t, `
+  EmptyList = <>`,
+		dfm.Property{Name: "EmptyList", Value: dfm.Items{}},
+	)
+}
+
+func TestParseOneItemListWithoutProperties(t *testing.T) {
+	parseProperties(t, `
+  List = <
+    item
+    end>`,
+		dfm.Property{Name: "List", Value: dfm.Items{[]dfm.Property{}}},
+	)
+}
+
+func TestParseItemLists(t *testing.T) {
+	parseProperties(t, `
+  EmptyList = <>
+  List = <
+    item
+    end
+    item
+      Zero = 0
+    end
+    item
+      One = 1
+      Two = 2
+    end>`,
+		dfm.Property{Name: "EmptyList", Value: dfm.Items{}},
+		dfm.Property{Name: "List", Value: dfm.Items{
+			[]dfm.Property{},
+			[]dfm.Property{
+				dfm.Property{Name: "Zero", Value: dfm.Int(0)},
+			},
+			[]dfm.Property{
+				dfm.Property{Name: "One", Value: dfm.Int(1)},
+				dfm.Property{Name: "Two", Value: dfm.Int(2)},
+			},
+		}},
 	)
 }
 

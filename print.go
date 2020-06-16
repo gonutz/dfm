@@ -33,13 +33,7 @@ func (p *printer) decIndent() {
 }
 
 func (p *printer) object(o Object) {
-	p.WriteString(p.indent)
-	if o.Inherited {
-		p.WriteString("inherited ")
-	} else {
-		p.WriteString("object ")
-	}
-	p.write(o.Name, ": ", o.Type, "\r\n")
+	p.write(p.indent, o.Kind.String(), " ", o.Name, ": ", o.Type, "\r\n")
 	p.incIndent()
 	for _, prop := range o.Properties {
 		if obj, ok := prop.Value.(Object); ok {
@@ -148,6 +142,20 @@ func (p *printer) propertyValue(value PropertyValue) {
 		}
 		p.WriteByte('}')
 		p.decIndent()
+	case Items:
+		p.WriteByte('<')
+		p.incIndent()
+		for _, properties := range v {
+			p.write("\r\n", p.indent, "item\r\n")
+			p.incIndent()
+			for _, prop := range properties {
+				p.property(prop)
+			}
+			p.decIndent()
+			p.write(p.indent, "end")
+		}
+		p.decIndent()
+		p.WriteByte('>')
 	default:
 		panic("unhandled property type " + fmt.Sprintf("%T", v))
 	}

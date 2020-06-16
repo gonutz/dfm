@@ -8,7 +8,11 @@ import (
 )
 
 func newParser(code string) *parser {
-	return &parser{tokens: tokenizer{code: []rune(code)}}
+	p := &parser{tokens: tokenizer{code: []rune(code)}}
+	if len(code) > 0 && code[0] == 0xFF {
+		p.err = errors.New("dfm.Parse: binary DFM files are not supported")
+	}
+	return p
 }
 
 type parser struct {
@@ -19,44 +23,60 @@ type parser struct {
 }
 
 func (p *parser) parseObject() (Object, error) {
-	var obj Object
-	if p.peekWord("inherited") {
-		p.word("inherited")
-		obj.Inherited = true
-	} else {
-		p.word("object")
+	if p.err != nil {
+		return Object{}, p.err
 	}
+
+	var obj Object
+
+	if p.peekWord("object") {
+		p.word("object")
+		obj.Kind = Plain
+	} else if p.peekWord("inherited") {
+		p.word("inherited")
+		obj.Kind = Inherited
+	} else if p.peekWord("inline") {
+		p.word("inline")
+		obj.Kind = Inline
+	}
+
 	obj.Name = p.identifier("object name")
 	p.token(':')
 	obj.Type = p.identifier("object type")
-	for {
+
+	for p.err == nil {
 		if p.peekEOF() || p.peekWord("end") {
 			p.nextToken()
 			break
 		}
-
-		var prop Property
-
-		if p.peekWord("object") || p.peekWord("inherited") {
-			child, err := p.parseObject()
-			if err != nil {
-				return obj, err
-			}
-			prop.Name = child.Name
-			prop.Value = child
-		} else {
-			prop.Name = p.identifier("property name")
-			for p.peekToken().tokenType == '.' {
-				p.nextToken()
-				prop.Name += "." + p.identifier("property name")
-			}
-			p.token('=')
-			prop.Value = p.parseValue()
-		}
-
-		obj.Properties = append(obj.Properties, prop)
+		obj.Properties = append(obj.Properties, p.parseProperty())
 	}
 	return obj, p.err
+}
+
+func (p *parser) parseProperty() Property {
+	var prop Property
+
+	if p.peekWord("object") || p.peekWord("inherited") || p.peekWord("inline") {
+		child, err := p.parseObject()
+		if err != nil {
+			p.err = err
+			return prop
+		}
+		prop.Name = child.Name
+		prop.Name = child.Name
+		prop.Value = child
+	} else {
+		prop.Name = p.identifier("property name")
+		for p.peekToken().tokenType == '.' {
+			p.nextToken()
+			prop.Name += "." + p.identifier("property name")
+		}
+		p.token('=')
+		prop.Value = p.parseValue()
+	}
+
+	return prop
 }
 
 func (p *parser) peekEOF() bool {
@@ -184,6 +204,20 @@ func (p *parser) parseValue() PropertyValue {
 		}
 
 		return Bytes(b)
+	case '<':
+		p.nextToken()
+		var items Items
+		for !p.peeksAt('>') && p.err == nil {
+			p.word("item")
+			var item []Property
+			for !p.peekWord("end") {
+				item = append(item, p.parseProperty())
+			}
+			p.word("end")
+			items = append(items, item)
+		}
+		p.nextToken() // Skip '>'.
+		return items
 	case tokenWord:
 		t := p.nextToken()
 		text := strings.ToLower(t.text)
@@ -192,7 +226,17 @@ func (p *parser) parseValue() PropertyValue {
 		} else if text == "true" {
 			return Bool(true)
 		} else {
-			return Identifier(t.text)
+			id := t.text
+			for p.peeksAt('.') {
+				p.nextToken()
+				t = p.nextToken()
+				if t.tokenType != tokenWord {
+					p.err = fmt.Errorf("another identifier is expected after '.' but was " + t.String())
+					return nil
+				}
+				id += "." + t.text
+			}
+			return Identifier(id)
 		}
 	default:
 		p.err = fmt.Errorf("unexpected token for property value: %v", p.nextToken())
