@@ -69,7 +69,8 @@ type Int int
 
 // Float is a floating point number, represented using a decimal point, i.e.
 // rather than using the scientific notations like 2.3E-4 it is written like a
-// human, e.g. 0.000234.
+// human, e.g. 0.000234. Float values of NaN and +-Infinity will be printed as
+// 0 since DFMs do not allow them.
 type Float float64
 
 // Bool is either True or False.

@@ -3,10 +3,13 @@ package dfm
 import (
 	"bytes"
 	"fmt"
+	"math"
 	"strconv"
 )
 
 // String returns the text representation of the Object as DFM code.
+// Float values NaN and +-Infinity are printed as 0 since they are invalid in
+// DFM files.
 func (o Object) String() string {
 	p := printer{}
 	p.object(o)
@@ -62,7 +65,11 @@ func (p *printer) propertyValue(value PropertyValue) {
 	case Int:
 		p.WriteString(strconv.Itoa(int(v)))
 	case Float:
-		p.WriteString(strconv.FormatFloat(float64(v), 'f', -1, 64))
+		f := float64(v)
+		if math.IsNaN(f) || math.IsInf(f, 0) {
+			f = 0
+		}
+		p.WriteString(strconv.FormatFloat(f, 'f', 18, 64))
 	case Bool:
 		if v {
 			p.WriteString("True")
@@ -70,6 +77,12 @@ func (p *printer) propertyValue(value PropertyValue) {
 			p.WriteString("False")
 		}
 	case String:
+		if string(v) == "" {
+			// The empty string is a special case that is not handled by the
+			// below logic.
+			p.WriteString("''")
+		}
+
 		const maxLineLen = 63
 		lineLen := 0
 		if len(string(v)) > maxLineLen {
