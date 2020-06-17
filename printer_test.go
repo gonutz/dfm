@@ -119,7 +119,7 @@ func TestPrintDFM(t *testing.T) {
   NegativeInfinity = 0.000000000000000000
   EmptyString = ''
   S = 'string'
-  Quoted = 'The ''Laser'''
+  Quoted = 'The '#39'Laser'#39
   NonASCII = #9#13#10
   LongString = 
     #10#9#9#9#9'A long string with four tabs at the start of each line.'#10#9#9#9 +

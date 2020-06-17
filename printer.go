@@ -104,10 +104,7 @@ func (p *printer) propertyValue(value PropertyValue) {
 				lineLen = 0
 			}
 
-			if r == '\'' {
-				beInString(true)
-				p.WriteString("''") // Escape ' quotes.
-			} else if 32 <= r && r < 127 {
+			if 32 <= r && r < 127 && r != '\'' {
 				beInString(true)
 				p.WriteRune(r) // Printable ASCII character.
 			} else {
