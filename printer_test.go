@@ -47,6 +47,8 @@ func TestPrintDFM(t *testing.T) {
 			dfm.Property{Name: "NegativeInfinity", Value: dfm.Float(math.Inf(-1))},
 			dfm.Property{Name: "EmptyString", Value: dfm.String("")},
 			dfm.Property{Name: "S", Value: dfm.String("string")},
+			dfm.Property{Name: "OneLine", Value: dfm.String(strings.Repeat("x", 64))},
+			dfm.Property{Name: "TwoLines", Value: dfm.String(strings.Repeat("x", 65))},
 			dfm.Property{Name: "Quoted", Value: dfm.String("The 'Laser'")},
 			dfm.Property{Name: "NonASCII", Value: dfm.String("\t\r\n")},
 			dfm.Property{Name: "LongString", Value: dfm.String(`
@@ -73,6 +75,11 @@ func TestPrintDFM(t *testing.T) {
 			dfm.Property{Name: "OneTwo", Value: dfm.Tuple{
 				dfm.Int(1),
 				dfm.Int(2),
+			}},
+			dfm.Property{Name: "StringTuple", Value: dfm.Tuple{
+				dfm.String(strings.Repeat("a", 10)),
+				dfm.String(strings.Repeat("b", 100)),
+				dfm.String(strings.Repeat("c", 5)),
 			}},
 			dfm.Property{Name: "EmptyBytes", Value: dfm.Bytes{}},
 			dfm.Property{Name: "OneByte", Value: dfm.Bytes{0xAF}},
@@ -122,6 +129,10 @@ func TestPrintDFM(t *testing.T) {
   NegativeInfinity = 0.000000000000000000
   EmptyString = ''
   S = 'string'
+  OneLine = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+  TwoLines = 
+    'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' +
+    'x'
   Quoted = 'The '#39'Laser'#39
   NonASCII = #9#13#10
   LongString = 
@@ -141,6 +152,12 @@ func TestPrintDFM(t *testing.T) {
   OneTwo = (
     1
     2)
+  StringTuple = (
+    'aaaaaaaaaa'
+    
+      'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' +
+      'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+    'ccccc')
   EmptyBytes = {
     }
   OneByte = {

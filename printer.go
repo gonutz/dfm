@@ -98,7 +98,7 @@ func (p *printer) propertyValue(value PropertyValue) {
 			p.WriteString("''")
 		}
 
-		const maxLineLen = 63
+		const maxLineLen = 64
 		lineLen := 0
 		if len(string(v)) > maxLineLen {
 			p.incIndent()
@@ -113,7 +113,7 @@ func (p *printer) propertyValue(value PropertyValue) {
 		}
 
 		for _, r := range string(v) {
-			if lineLen > maxLineLen {
+			if lineLen >= maxLineLen {
 				beInString(false)
 				p.write(" +\r\n", p.indent)
 				lineLen = 0
