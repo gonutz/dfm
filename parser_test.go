@@ -211,10 +211,14 @@ func TestParseFloatProperties(t *testing.T) {
 	parseProperties(t, `
   Scale = 1.5
   Height = -2.5
-  Pos = +10.000`,
+  Pos = +10.000
+  Tiny = 5.5E-10
+  Huge = 1.1e20`,
 		dfm.Property{Name: "Scale", Value: dfm.Float(1.5)},
 		dfm.Property{Name: "Height", Value: dfm.Float(-2.5)},
 		dfm.Property{Name: "Pos", Value: dfm.Float(10)},
+		dfm.Property{Name: "Tiny", Value: dfm.Float(5.5e-10)},
+		dfm.Property{Name: "Huge", Value: dfm.Float(1.1e+20)},
 	)
 }
 

@@ -77,6 +77,15 @@ func (t *tokenizer) next() token {
 				for digit(t.nextRune()) {
 				}
 			}
+			if t.currentRune() == 'e' || t.currentRune() == 'E' {
+				t.nextRune()
+				haveType = tokenFloat
+				if t.currentRune() == '+' || t.currentRune() == '-' {
+					t.nextRune()
+				}
+				for digit(t.nextRune()) {
+				}
+			}
 		} else {
 			// For an illegal token we only consume one rune. The next call to
 			// this function then tries to continue after the illegal rune.

@@ -74,14 +74,27 @@ func (p *printer) propertyValue(value PropertyValue) {
 		// always. When converting to a string it uses the "best" visual style,
 		// this is the -1 for strconv.FormatFloat in Go, and it just fills it
 		// with 0s. To be as close to Delphi as possible, we do the same here.
-		s := strconv.FormatFloat(f, 'f', -1, 64)
-		dot := strings.Index(s, ".")
-		if dot == -1 {
-			s += ".000000000000000000"
+		//
+		// Also Delphi uses E notation for numbers above 1e+16. Below that, even
+		// for numbers below 1e-16, it uses digits only.
+		var s string
+		if f >= 1e+16 {
+			s = strconv.FormatFloat(f, 'e', -1, 64)
 		} else {
-			zeros := 18 - (len(s) - 1 - dot)
-			for i := 0; i < zeros; i++ {
-				s += "0"
+			s = strconv.FormatFloat(f, 'f', -1, 64)
+		}
+		if strings.Contains(s, "e") {
+			s = strings.Replace(s, "e+", "E", 1)
+			s = strings.Replace(s, "e-", "E-", 1)
+		} else {
+			dot := strings.Index(s, ".")
+			if dot == -1 {
+				s += ".000000000000000000"
+			} else {
+				zeros := 18 - (len(s) - 1 - dot)
+				for i := 0; i < zeros; i++ {
+					s += "0"
+				}
 			}
 		}
 		p.WriteString(s)

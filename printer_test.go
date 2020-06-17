@@ -42,6 +42,9 @@ func TestPrintDFM(t *testing.T) {
 			dfm.Property{Name: "Scale", Value: dfm.Float(1.0)},
 			dfm.Property{Name: "F.G", Value: dfm.Float(-123.1875)},
 			dfm.Property{Name: "Precise", Value: dfm.Float(39043.36641510417)},
+			dfm.Property{Name: "Huge", Value: dfm.Float(1.000000040918479e35)},
+			dfm.Property{Name: "Decimal", Value: dfm.Float(1e+15)},
+			dfm.Property{Name: "UseE", Value: dfm.Float(1e+16)},
 			dfm.Property{Name: "Not.A.Number", Value: dfm.Float(math.NaN())},
 			dfm.Property{Name: "Infinity", Value: dfm.Float(math.Inf(+1))},
 			dfm.Property{Name: "NegativeInfinity", Value: dfm.Float(math.Inf(-1))},
@@ -124,6 +127,9 @@ func TestPrintDFM(t *testing.T) {
   Scale = 1.000000000000000000
   F.G = -123.187500000000000000
   Precise = 39043.366415104170000000
+  Huge = 1.000000040918479E35
+  Decimal = 1000000000000000.000000000000000000
+  UseE = 1E16
   Not.A.Number = 0.000000000000000000
   Infinity = 0.000000000000000000
   NegativeInfinity = 0.000000000000000000

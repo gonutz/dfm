@@ -19,6 +19,9 @@ func TestTokenize(t *testing.T) {
   #32
   {123F}
   1.5
+  1e5
+  1.5E-2
+  1E+1
   <>
 end`,
 		tok(tokenWord, "object"),
@@ -64,6 +67,12 @@ end`,
 		tok('}', "}"),
 		tok(tokenWhiteSpace, "\n  "),
 		tok(tokenFloat, "1.5"),
+		tok(tokenWhiteSpace, "\n  "),
+		tok(tokenFloat, "1e5"),
+		tok(tokenWhiteSpace, "\n  "),
+		tok(tokenFloat, "1.5E-2"),
+		tok(tokenWhiteSpace, "\n  "),
+		tok(tokenFloat, "1E+1"),
 		tok(tokenWhiteSpace, "\n  "),
 		tok('<', "<"),
 		tok('>', ">"),
@@ -163,7 +172,9 @@ func printTokenComparison(want, have []token) string {
 	for i := 0; i < n; i++ {
 		s += "\n"
 
-		if i < len(want) && i < len(have) && want[i] == have[i] {
+		if i < len(want) && i < len(have) &&
+			want[i].tokenType == have[i].tokenType &&
+			want[i].text == have[i].text {
 			s += "  "
 		} else {
 			s += "x "
