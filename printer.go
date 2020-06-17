@@ -6,6 +6,7 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 )
 
 // String returns the text representation of the Object as DFM code.
@@ -105,7 +106,8 @@ func (p *printer) propertyValue(value PropertyValue) {
 			p.WriteString("False")
 		}
 	case String:
-		if string(v) == "" {
+		s := string(v)
+		if s == "" {
 			// The empty string is a special case that is not handled by the
 			// below logic.
 			p.WriteString("''")
@@ -113,7 +115,8 @@ func (p *printer) propertyValue(value PropertyValue) {
 
 		const maxLineLen = 64
 		lineLen := 0
-		if len(string(v)) > maxLineLen {
+		oneLine := utf8.RuneCountInString(s) <= maxLineLen
+		if !oneLine {
 			p.incIndent()
 			p.write("\r\n", p.indent)
 		}
@@ -125,7 +128,7 @@ func (p *printer) propertyValue(value PropertyValue) {
 			}
 		}
 
-		for _, r := range string(v) {
+		for _, r := range s {
 			if lineLen >= maxLineLen {
 				beInString(false)
 				p.write(" +\r\n", p.indent)
@@ -145,7 +148,7 @@ func (p *printer) propertyValue(value PropertyValue) {
 		}
 		beInString(false)
 
-		if len(string(v)) > maxLineLen {
+		if !oneLine {
 			p.decIndent()
 		}
 	case Identifier:

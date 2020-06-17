@@ -50,10 +50,12 @@ func TestPrintDFM(t *testing.T) {
 			dfm.Property{Name: "NegativeInfinity", Value: dfm.Float(math.Inf(-1))},
 			dfm.Property{Name: "EmptyString", Value: dfm.String("")},
 			dfm.Property{Name: "S", Value: dfm.String("string")},
+			dfm.Property{Name: "Unicode1Line", Value: dfm.String(strings.Repeat("ä", 64))},
+			dfm.Property{Name: "Unicode2Lines", Value: dfm.String(strings.Repeat("ä", 65))},
 			dfm.Property{Name: "OneLine", Value: dfm.String(strings.Repeat("x", 64))},
 			dfm.Property{Name: "TwoLines", Value: dfm.String(strings.Repeat("x", 65))},
 			dfm.Property{Name: "Quoted", Value: dfm.String("The 'Laser'")},
-			dfm.Property{Name: "NonASCII", Value: dfm.String("\t\r\n")},
+			dfm.Property{Name: "Control", Value: dfm.String("\t\r\n")},
 			dfm.Property{Name: "LongString", Value: dfm.String(`
 				A long string with four tabs at the start of each line.
 				The string starts with a line break and ends with a line break,
@@ -135,12 +137,16 @@ func TestPrintDFM(t *testing.T) {
   NegativeInfinity = 0.000000000000000000
   EmptyString = ''
   S = 'string'
+  Unicode1Line = #228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228
+  Unicode2Lines = 
+    #228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228#228 +
+    #228
   OneLine = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
   TwoLines = 
     'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' +
     'x'
   Quoted = 'The '#39'Laser'#39
-  NonASCII = #9#13#10
+  Control = #9#13#10
   LongString = 
     #10#9#9#9#9'A long string with four tabs at the start of each line.'#10#9#9#9 +
     #9'The string starts with a line break and ends with a line break,' +
