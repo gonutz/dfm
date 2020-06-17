@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"strings"
 )
 
 // String returns the text representation of the Object as DFM code.
@@ -69,7 +70,21 @@ func (p *printer) propertyValue(value PropertyValue) {
 		if math.IsNaN(f) || math.IsInf(f, 0) {
 			f = 0
 		}
-		p.WriteString(strconv.FormatFloat(f, 'f', 18, 64))
+		// Delphi prints floating point numbers with 18 digits after the dot,
+		// always. When converting to a string it uses the "best" visual style,
+		// this is the -1 for strconv.FormatFloat in Go, and it just fills it
+		// with 0s. To be as close to Delphi as possible, we do the same here.
+		s := strconv.FormatFloat(f, 'f', -1, 64)
+		dot := strings.Index(s, ".")
+		if dot == -1 {
+			s += ".000000000000000000"
+		} else {
+			zeros := 18 - (len(s) - 1 - dot)
+			for i := 0; i < zeros; i++ {
+				s += "0"
+			}
+		}
+		p.WriteString(s)
 	case Bool:
 		if v {
 			p.WriteString("True")

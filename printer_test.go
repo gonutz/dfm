@@ -14,7 +14,8 @@ func TestPrintDFM(t *testing.T) {
 	// - if Object.Name is empty, only print the type.
 	// - All Kinds of Object.
 	// - All implementations of PropertyValue.
-	// - Print Float with 18 digits after the point.
+	// - Print Float with 18 digits after the point. The actual precision is
+	//   usually lower, though (strange Delphi behavior, see printer.go).
 	// - Strings with quotes and non-ASCII characters.
 	// - Long Strings should span multiple lines.
 	// - Identifiers with dots, both as property names and values.
@@ -40,6 +41,7 @@ func TestPrintDFM(t *testing.T) {
 			dfm.Property{Name: "Top", Value: dfm.Int(-123)},
 			dfm.Property{Name: "Scale", Value: dfm.Float(1.0)},
 			dfm.Property{Name: "F.G", Value: dfm.Float(-123.1875)},
+			dfm.Property{Name: "Precise", Value: dfm.Float(39043.36641510417)},
 			dfm.Property{Name: "Not.A.Number", Value: dfm.Float(math.NaN())},
 			dfm.Property{Name: "Infinity", Value: dfm.Float(math.Inf(+1))},
 			dfm.Property{Name: "NegativeInfinity", Value: dfm.Float(math.Inf(-1))},
@@ -114,6 +116,7 @@ func TestPrintDFM(t *testing.T) {
   Top = -123
   Scale = 1.000000000000000000
   F.G = -123.187500000000000000
+  Precise = 39043.366415104170000000
   Not.A.Number = 0.000000000000000000
   Infinity = 0.000000000000000000
   NegativeInfinity = 0.000000000000000000
