@@ -115,6 +115,23 @@ func TestParseTupleProperty(t *testing.T) {
 	)
 }
 
+func TestParseTupleOfStrings(t *testing.T) {
+	parseProperties(t, `
+  Strings = (
+    'a'
+    'b'
+    
+    'bro' +
+
+    'ken')`,
+		dfm.Property{Name: "Strings", Value: dfm.Tuple{
+			dfm.String("a"),
+			dfm.String("b"),
+			dfm.String("broken"),
+		}},
+	)
+}
+
 func TestParseNestedObject(t *testing.T) {
 	parseObject(t,
 		`object A: TA

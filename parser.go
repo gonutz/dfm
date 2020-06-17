@@ -123,18 +123,49 @@ func (p *parser) parseValue() PropertyValue {
 			return Float(float64(sign) * n)
 		}
 	case tokenCharacter, tokenString:
-		var s string
-		for p.peeksAt(tokenString) || p.peeksAt(tokenCharacter) || p.peeksAt('+') {
-			t := p.nextToken()
+		// String literals can span multiple lines if connected with a '+'.
+		// String literals can contain quoted strings and character literals.
+		//
+		//     'string'#9'with tab' +
+		//     #13#10'second line#13#10
+		//     'This is another string (no ''+'' before it)'
+		//
+		// A line break terminates a string if the last token was not a '+'.
+		tokenToString := func(t token) string {
 			if t.tokenType == tokenString {
-				s += escapeString(t.text)
+				return escapeString(t.text)
 			} else if t.tokenType == tokenCharacter {
 				n, err := strconv.Atoi(t.text[1:])
 				if err != nil {
 					p.err = fmt.Errorf("error parsing character literal: %v", err)
-					return nil
+					return ""
 				}
-				s += string(rune(n))
+				return string(rune(n))
+			}
+			return ""
+		}
+
+		// Start this string with the string/character token.
+		t := p.nextToken()
+		s := tokenToString(t)
+		lastLine := t.line
+		lastWasPlus := false
+		// The string continues if other strings/characters appear on the same
+		// line or if the last token on a line is a '+', in that case the next
+		// string/character token continues the string.
+		for {
+			next := p.peekToken()
+			if next.tokenType == '+' {
+				lastWasPlus = true
+				p.nextToken()
+			} else if (next.tokenType == tokenString || next.tokenType == tokenCharacter) &&
+				(lastWasPlus || next.line == lastLine) {
+				t := p.nextToken()
+				s += tokenToString(t)
+				lastLine = t.line
+				lastWasPlus = false
+			} else {
+				break
 			}
 		}
 		return String(s)
