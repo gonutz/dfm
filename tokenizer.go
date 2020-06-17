@@ -113,13 +113,25 @@ func (t *tokenizer) next() token {
 // largest part of a typical DFM, this function allows the parser to process
 // this much quicker than re-combining integers and words.
 func (t *tokenizer) findClosingBrace() []rune {
+	oldLine, oldCol := t.line, t.col
+
 	for i := t.cur; i < len(t.code); i++ {
+		if t.code[i] == '\n' {
+			t.line++
+			t.col = 1
+		} else {
+			t.col++
+		}
+
 		if t.code[i] == '}' {
 			part := t.code[t.cur:i]
 			t.cur = i
 			return part
 		}
 	}
+
+	// No closing brace was found.
+	t.line, t.col = oldLine, oldCol
 	return nil
 }
 
