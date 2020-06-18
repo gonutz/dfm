@@ -1,10 +1,46 @@
 package dfm
 
-// Parse expects the code to start with an object. The first object in the given
-// code is parsed, if there are more, they are ignored. A DFM file typically has
-// one top-level object defined in it. It might contain child objects however.
-func Parse(code string) (Object, error) {
-	return newParser(code).parseObject()
+import (
+	"bytes"
+	"errors"
+	"io"
+	"io/ioutil"
+)
+
+// ParseReader parses one object read from the given io.Reader. See ParseBytes.
+func ParseReader(r io.Reader) (Object, error) {
+	code, err := ioutil.ReadAll(r)
+	if err != nil {
+		return Object{}, err
+	}
+	return ParseBytes(code)
+}
+
+// ParseReader parses one object read from the given file. See ParseBytes.
+func ParseFile(path string) (Object, error) {
+	code, err := ioutil.ReadFile(path)
+	if err != nil {
+		return Object{}, err
+	}
+	return ParseBytes(code)
+}
+
+// ParseBytes expects the code to start with an object. The first object in the
+// given code is parsed, if there are more, they are ignored. A DFM file
+// typically has one top-level object defined in it. It might contain child
+// objects however. The code is expected to be UTF-8 encoded. It may start with
+// a UTF-8 byte oder mark (0xEF,0xBB,0xBF).
+func ParseBytes(code []byte) (Object, error) {
+	if len(code) > 0 && code[0] == 0xFF {
+		return Object{}, errors.New("dfm.Parse: binary DFM files are not supported")
+	}
+	return parse(bytes.Runes(bytes.TrimPrefix(code, utf8bom)))
+}
+
+// ParseReader parses one object read from the given file. See ParseBytes. The
+// code must not start with a UTF-8 byte oder mark.
+func ParseString(code string) (Object, error) {
+	return parse([]rune(code))
 }
 
 // Object can be a TPanel, TLabel, TForm, a sub-class of these or any other
@@ -108,11 +144,6 @@ type Set []PropertyValue
 //     (123 456 789)
 type Tuple []PropertyValue
 
-// Bytes is a in list of hexadecimal data in braces like
-//
-//     { FFAC2938AA991234A }
-type Bytes []byte
-
 // Items is a list of property lists (2D list of properies) like
 //
 //     <
@@ -126,6 +157,11 @@ type Bytes []byte
 //       end>
 type Items [][]Property
 
+// Bytes is a in list of hexadecimal data in braces like
+//
+//     { FFAC2938AA991234A }
+type Bytes []byte
+
 func (Object) isPropertyValue()     {}
 func (Int) isPropertyValue()        {}
 func (Float) isPropertyValue()      {}
@@ -134,5 +170,5 @@ func (String) isPropertyValue()     {}
 func (Identifier) isPropertyValue() {}
 func (Set) isPropertyValue()        {}
 func (Tuple) isPropertyValue()      {}
-func (Bytes) isPropertyValue()      {}
 func (Items) isPropertyValue()      {}
+func (Bytes) isPropertyValue()      {}

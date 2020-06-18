@@ -18,6 +18,13 @@ end`,
 	)
 }
 
+func TestParseFileWithUTF8Header(t *testing.T) {
+	code := append(utf8bom, []byte(`object T end`)...)
+	obj, err := dfm.ParseBytes(code)
+	check.Eq(t, err, nil)
+	check.Eq(t, obj, dfm.Object{Type: "T"})
+}
+
 func TestParseIntProperty(t *testing.T) {
 	parseProperties(t, `
   Left = 0
@@ -326,7 +333,7 @@ end`,
 
 func parseObject(t *testing.T, code string, want dfm.Object) {
 	t.Helper()
-	obj, err := dfm.Parse(code)
+	obj, err := dfm.ParseString(code)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -336,7 +343,7 @@ func parseObject(t *testing.T, code string, want dfm.Object) {
 func parseProperties(t *testing.T, partialCode string, want ...dfm.Property) {
 	t.Helper()
 	code := "object Obj: Typ\r\n" + partialCode + "\r\nend"
-	obj, err := dfm.Parse(code)
+	obj, err := dfm.ParseString(code)
 	if err != nil {
 		t.Fatal(err)
 	}

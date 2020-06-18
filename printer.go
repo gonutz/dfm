@@ -3,19 +3,82 @@ package dfm
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"math"
 	"strconv"
 	"strings"
 	"unicode/utf8"
 )
 
+var utf8bom = []byte{0xEF, 0xBB, 0xBF}
+
 // String returns the text representation of the Object as DFM code.
 // Float values NaN and +-Infinity are printed as 0 since they are invalid in
 // DFM files.
 func (o Object) String() string {
+	return string(bytes.TrimPrefix(o.Print(), utf8bom))
+}
+
+func (o Object) Print() []byte {
+	var buf bytes.Buffer
+	o.Write(&buf)
+	return buf.Bytes()
+}
+
+func (o Object) Write(w io.Writer) error {
 	p := printer{}
+	if !onlyASCII(o) {
+		p.Write(utf8bom)
+	}
 	p.object(o)
-	return p.String()
+	_, err := w.Write(p.Bytes())
+	return err
+}
+
+func onlyASCII(value PropertyValue) bool {
+	switch v := value.(type) {
+	case Object:
+		if !(isASCII(v.Name) && isASCII(v.Type)) {
+			return false
+		}
+		for i := range v.Properties {
+			if !(isASCII(v.Properties[i].Name) && onlyASCII(v.Properties[i].Value)) {
+				return false
+			}
+		}
+	case Identifier:
+		return isASCII(string(v))
+	case Set:
+		for i := range v {
+			if !onlyASCII(v[i]) {
+				return false
+			}
+		}
+	case Tuple:
+		for i := range v {
+			if !onlyASCII(v[i]) {
+				return false
+			}
+		}
+	case Items:
+		for i := range v {
+			for j := range v[i] {
+				if !(isASCII(v[i][j].Name) && onlyASCII(v[i][j].Value)) {
+					return false
+				}
+			}
+		}
+	}
+	return true
+}
+
+func isASCII(s string) bool {
+	for i := 0; i < len(s); i++ {
+		if s[i] > 127 {
+			return false
+		}
+	}
+	return true
 }
 
 type printer struct {

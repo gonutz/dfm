@@ -6,8 +6,108 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gonutz/check"
 	"github.com/gonutz/dfm"
 )
+
+var utf8bom = []byte{0xEF, 0xBB, 0xBF}
+
+func TestASCIIobjectsAreSavedWithoutBOM(t *testing.T) {
+	objs := []dfm.Object{
+		dfm.Object{Name: "a"},
+		dfm.Object{Type: "a"},
+		dfm.Object{Properties: []dfm.Property{
+			dfm.Property{Name: "_", Value: dfm.Object{Name: "a"}},
+		}},
+		dfm.Object{Properties: []dfm.Property{
+			dfm.Property{Name: "a", Value: dfm.Int(0)},
+		}},
+		dfm.Object{Properties: []dfm.Property{
+			dfm.Property{Name: "a", Value: dfm.String("")},
+		}},
+		dfm.Object{Properties: []dfm.Property{
+			dfm.Property{Name: "a", Value: dfm.String("döes nöt mättér")},
+		}},
+		dfm.Object{Properties: []dfm.Property{
+			dfm.Property{Name: "_", Value: dfm.Identifier("a")},
+		}},
+		dfm.Object{Properties: []dfm.Property{
+			dfm.Property{Name: "_", Value: dfm.Set{
+				dfm.Identifier("a"),
+			}},
+		}},
+		dfm.Object{Properties: []dfm.Property{
+			dfm.Property{Name: "_", Value: dfm.Tuple{
+				dfm.Identifier("a"),
+			}},
+		}},
+		dfm.Object{Properties: []dfm.Property{
+			dfm.Property{Name: "_", Value: dfm.Items{
+				[]dfm.Property{dfm.Property{
+					Name: "a", Value: dfm.Int(0),
+				}},
+			}},
+		}},
+		dfm.Object{Properties: []dfm.Property{
+			dfm.Property{Name: "_", Value: dfm.Items{
+				[]dfm.Property{dfm.Property{
+					Name: "_", Value: dfm.Identifier("a"),
+				}},
+			}},
+		}},
+	}
+	for i, obj := range objs {
+		data := obj.Print()
+		check.Neq(t, data[:3], utf8bom, "object ", i)
+	}
+}
+
+func TestNonASCIIobjectsAreSavedWithBOM(t *testing.T) {
+	objs := []dfm.Object{
+		dfm.Object{Name: "ä"},
+		dfm.Object{Type: "ä"},
+		dfm.Object{Properties: []dfm.Property{
+			dfm.Property{Name: "_", Value: dfm.Object{Name: "ä"}},
+		}},
+		dfm.Object{Properties: []dfm.Property{
+			dfm.Property{Name: "ä", Value: dfm.Int(0)},
+		}},
+		dfm.Object{Properties: []dfm.Property{
+			dfm.Property{Name: "ä", Value: dfm.String("")},
+		}},
+		dfm.Object{Properties: []dfm.Property{
+			dfm.Property{Name: "_", Value: dfm.Identifier("ä")},
+		}},
+		dfm.Object{Properties: []dfm.Property{
+			dfm.Property{Name: "_", Value: dfm.Set{
+				dfm.Identifier("ä"),
+			}},
+		}},
+		dfm.Object{Properties: []dfm.Property{
+			dfm.Property{Name: "_", Value: dfm.Tuple{
+				dfm.Identifier("ä"),
+			}},
+		}},
+		dfm.Object{Properties: []dfm.Property{
+			dfm.Property{Name: "_", Value: dfm.Items{
+				[]dfm.Property{dfm.Property{
+					Name: "ä", Value: dfm.Int(0),
+				}},
+			}},
+		}},
+		dfm.Object{Properties: []dfm.Property{
+			dfm.Property{Name: "_", Value: dfm.Items{
+				[]dfm.Property{dfm.Property{
+					Name: "_", Value: dfm.Identifier("ä"),
+				}},
+			}},
+		}},
+	}
+	for i, obj := range objs {
+		data := obj.Print()
+		check.Eq(t, data[:3], utf8bom, "object ", i)
+	}
+}
 
 func TestPrintDFM(t *testing.T) {
 	// Things to test:
