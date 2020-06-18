@@ -13,6 +13,7 @@ func TestPrintDFM(t *testing.T) {
 	// Things to test:
 	// - if Object.Name is empty, only print the type.
 	// - All Kinds of Object.
+	// - Objects with index.
 	// - All implementations of PropertyValue.
 	// - Print Float with 18 digits after the point. The actual precision is
 	//   usually lower, though (strange Delphi behavior, see printer.go).
@@ -35,6 +36,14 @@ func TestPrintDFM(t *testing.T) {
 					Name: "Child",
 					Type: "TChild",
 					Kind: dfm.Inherited,
+				},
+			},
+			dfm.Property{
+				Value: dfm.Object{
+					Name:     "IndexObject",
+					Type:     "TPanel",
+					HasIndex: true,
+					Index:    123,
 				},
 			},
 			dfm.Property{Name: "Left", Value: dfm.Int(123)},
@@ -123,6 +132,8 @@ func TestPrintDFM(t *testing.T) {
   inline TSubObject
   end
   inherited Child: TChild
+  end
+  object IndexObject: TPanel [123]
   end
   Left = 123
   Top = -123

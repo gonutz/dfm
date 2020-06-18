@@ -49,6 +49,19 @@ func (p *parser) parseObject() (Object, error) {
 		obj.Type = nameOrType
 	}
 
+	if p.peeksAt('[') {
+		p.token('[')
+		index := p.parseValue()
+		if i, ok := index.(Int); ok {
+			obj.HasIndex = true
+			obj.Index = int(i)
+		} else {
+			p.err = fmt.Errorf("object index must be integer but was %#v", index)
+			return obj, p.err
+		}
+		p.token(']')
+	}
+
 	for p.err == nil {
 		if p.peekEOF() || p.peekWord("end") {
 			p.nextToken()

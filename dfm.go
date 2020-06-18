@@ -19,7 +19,16 @@ type Object struct {
 	Type string
 	// Kind determines whether the keyword for the object is "object",
 	// "inherited" or "inline".
-	Kind       ObjectKind
+	Kind ObjectKind
+	// If HasIndex is true then the object has Index defined, if not there is no
+	// index. Example:
+	//
+	//     object M: TMenuItem [0]
+	//       ...
+	//
+	// would have HasIndex=true and Index=0.
+	HasIndex   bool
+	Index      int
 	Properties []Property
 }
 

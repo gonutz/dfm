@@ -40,10 +40,14 @@ func (p *printer) decIndent() {
 func (p *printer) object(o Object) {
 	if o.Name == "" {
 		// Anonymous object.
-		p.write(p.indent, o.Kind.String(), " ", o.Type, "\r\n")
+		p.write(p.indent, o.Kind.String(), " ", o.Type)
 	} else {
-		p.write(p.indent, o.Kind.String(), " ", o.Name, ": ", o.Type, "\r\n")
+		p.write(p.indent, o.Kind.String(), " ", o.Name, ": ", o.Type)
 	}
+	if o.HasIndex {
+		p.write(" [", strconv.Itoa(o.Index), "]")
+	}
+	p.WriteString("\r\n")
 	p.incIndent()
 	for _, prop := range o.Properties {
 		if obj, ok := prop.Value.(Object); ok {

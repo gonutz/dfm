@@ -300,6 +300,30 @@ end`,
 	)
 }
 
+func TestParseObjectIndex(t *testing.T) {
+	parseObject(t,
+		`object P0: TPanel [0]
+end`,
+		dfm.Object{
+			Name:     "P0",
+			Type:     "TPanel",
+			HasIndex: true,
+			Index:    0,
+		},
+	)
+
+	parseObject(t,
+		`object P1: TPanel [1]
+end`,
+		dfm.Object{
+			Name:     "P1",
+			Type:     "TPanel",
+			HasIndex: true,
+			Index:    1,
+		},
+	)
+}
+
 func parseObject(t *testing.T, code string, want dfm.Object) {
 	t.Helper()
 	obj, err := dfm.Parse(code)
