@@ -14,17 +14,26 @@ var utf8bom = []byte{0xEF, 0xBB, 0xBF}
 
 // String returns the text representation of the Object as DFM code.
 // Float values NaN and +-Infinity are printed as 0 since they are invalid in
-// DFM files.
+// DFM files. The string never contains a UTF-8 byte order mark. For that use
+// Object.Print.
 func (o Object) String() string {
 	return string(bytes.TrimPrefix(o.Print(), utf8bom))
 }
 
+// String returns the text representation of the Object as DFM code as bytes.
+// Float values NaN and +-Infinity are printed as 0 since they are invalid in
+// DFM files. If the Object contains unicode characters the return value will
+// be encoded as UTF-8 and start with the UTF-8 byte order mark.
 func (o Object) Print() []byte {
 	var buf bytes.Buffer
 	o.Write(&buf)
 	return buf.Bytes()
 }
 
+// Write prints the text representation of the Object as DFM code to the given
+// io.Writer. Float values NaN and +-Infinity are printed as 0 since they are
+// invalid in DFM files. If the Object contains unicode characters the text will
+// be encoded as UTF-8 and start with the UTF-8 byte order mark.
 func (o Object) Write(w io.Writer) error {
 	p := printer{}
 	if !onlyASCII(o) {
