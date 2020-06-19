@@ -310,14 +310,14 @@ func (p *parser) word(text string) {
 }
 
 func (p *parser) identifier(desc string) string {
-	if p.err == nil {
-		t := p.nextToken()
-		if t.tokenType == tokenWord {
-			return t.text
-		} else {
-			p.err = fmt.Errorf("identifier expected as "+desc+" but was %v", t)
-		}
+	if p.err != nil {
+		return ""
 	}
+	t := p.nextToken()
+	if t.tokenType == tokenWord {
+		return t.text
+	}
+	p.err = fmt.Errorf("identifier expected as "+desc+" but was %v", t)
 	return ""
 }
 
