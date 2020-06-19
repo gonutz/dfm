@@ -11,7 +11,7 @@ func TestParseEmptyObject(t *testing.T) {
 	parseObject(t,
 		`object Dialog: TDialog
 end`,
-		dfm.Object{
+		&dfm.Object{
 			Name: "Dialog",
 			Type: "TDialog",
 		},
@@ -22,7 +22,7 @@ func TestParseFileWithUTF8Header(t *testing.T) {
 	code := append(utf8bom, []byte(`object T end`)...)
 	obj, err := dfm.ParseBytes(code)
 	check.Eq(t, err, nil)
-	check.Eq(t, obj, dfm.Object{Type: "T"})
+	check.Eq(t, obj, &dfm.Object{Type: "T"})
 }
 
 func TestParseIntProperty(t *testing.T) {
@@ -146,13 +146,13 @@ func TestParseNestedObject(t *testing.T) {
     Nested = True
   end
 end`,
-		dfm.Object{
+		&dfm.Object{
 			Name: "A",
 			Type: "TA",
 			Properties: []dfm.Property{
 				{
 					Name: "B",
-					Value: dfm.Object{
+					Value: &dfm.Object{
 						Name: "B",
 						Type: "TB",
 						Properties: []dfm.Property{
@@ -173,13 +173,13 @@ func TestParseNestedObjects(t *testing.T) {
   object C: TC
   end
 end`,
-		dfm.Object{
+		&dfm.Object{
 			Name: "A",
 			Type: "TA",
 			Properties: []dfm.Property{
 				{
 					Name: "B",
-					Value: dfm.Object{
+					Value: &dfm.Object{
 						Name:       "B",
 						Type:       "TB",
 						Properties: []dfm.Property{},
@@ -187,7 +187,7 @@ end`,
 				},
 				{
 					Name: "C",
-					Value: dfm.Object{
+					Value: &dfm.Object{
 						Name:       "C",
 						Type:       "TC",
 						Properties: []dfm.Property{},
@@ -233,7 +233,7 @@ func TestParseInheritedObject(t *testing.T) {
 	parseObject(t,
 		`inherited Dialog: TDialog
 end`,
-		dfm.Object{
+		&dfm.Object{
 			Name: "Dialog",
 			Type: "TDialog",
 			Kind: dfm.Inherited,
@@ -245,7 +245,7 @@ func TestParseInlineObject(t *testing.T) {
 	parseObject(t,
 		`inline Dialog: TDialog
 end`,
-		dfm.Object{
+		&dfm.Object{
 			Name: "Dialog",
 			Type: "TDialog",
 			Kind: dfm.Inline,
@@ -300,7 +300,7 @@ func TestParseAnonymousObject(t *testing.T) {
 	parseObject(t,
 		`object TMenuItem
 end`,
-		dfm.Object{
+		&dfm.Object{
 			Name: "",
 			Type: "TMenuItem",
 		},
@@ -311,7 +311,7 @@ func TestParseObjectIndex(t *testing.T) {
 	parseObject(t,
 		`object P0: TPanel [0]
 end`,
-		dfm.Object{
+		&dfm.Object{
 			Name:     "P0",
 			Type:     "TPanel",
 			HasIndex: true,
@@ -322,7 +322,7 @@ end`,
 	parseObject(t,
 		`object P1: TPanel [1]
 end`,
-		dfm.Object{
+		&dfm.Object{
 			Name:     "P1",
 			Type:     "TPanel",
 			HasIndex: true,
@@ -331,7 +331,7 @@ end`,
 	)
 }
 
-func parseObject(t *testing.T, code string, want dfm.Object) {
+func parseObject(t *testing.T, code string, want *dfm.Object) {
 	t.Helper()
 	obj, err := dfm.ParseString(code)
 	if err != nil {
@@ -347,7 +347,7 @@ func parseProperties(t *testing.T, partialCode string, want ...dfm.Property) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	check.Eq(t, obj, dfm.Object{
+	check.Eq(t, obj, &dfm.Object{
 		Name:       "Obj",
 		Type:       "Typ",
 		Properties: want,

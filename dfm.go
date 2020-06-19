@@ -8,19 +8,19 @@ import (
 )
 
 // ParseReader parses one object read from the given io.Reader. See ParseBytes.
-func ParseReader(r io.Reader) (Object, error) {
+func ParseReader(r io.Reader) (*Object, error) {
 	code, err := ioutil.ReadAll(r)
 	if err != nil {
-		return Object{}, err
+		return nil, err
 	}
 	return ParseBytes(code)
 }
 
 // ParseFile parses one object read from the given file. See ParseBytes.
-func ParseFile(path string) (Object, error) {
+func ParseFile(path string) (*Object, error) {
 	code, err := ioutil.ReadFile(path)
 	if err != nil {
-		return Object{}, err
+		return nil, err
 	}
 	return ParseBytes(code)
 }
@@ -30,16 +30,16 @@ func ParseFile(path string) (Object, error) {
 // typically has one top-level object defined in it. It might contain child
 // objects however. The code is expected to be UTF-8 encoded. It may start with
 // a UTF-8 byte oder mark (0xEF,0xBB,0xBF).
-func ParseBytes(code []byte) (Object, error) {
+func ParseBytes(code []byte) (*Object, error) {
 	if len(code) > 0 && code[0] == 0xFF {
-		return Object{}, errors.New("dfm.Parse: binary DFM files are not supported")
+		return nil, errors.New("dfm.Parse: binary DFM files are not supported")
 	}
 	return parse(bytes.Runes(bytes.TrimPrefix(code, utf8bom)))
 }
 
 // ParseString parses one object read from the given file. See ParseBytes. The
 // code must not start with a UTF-8 byte oder mark.
-func ParseString(code string) (Object, error) {
+func ParseString(code string) (*Object, error) {
 	return parse([]rune(code))
 }
 
@@ -162,7 +162,7 @@ type Items [][]Property
 //     { FFAC2938AA991234A }
 type Bytes []byte
 
-func (Object) isPropertyValue()     {}
+func (*Object) isPropertyValue()    {}
 func (Int) isPropertyValue()        {}
 func (Float) isPropertyValue()      {}
 func (Bool) isPropertyValue()       {}

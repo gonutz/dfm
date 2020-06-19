@@ -34,7 +34,7 @@ func (o Object) Print() []byte {
 // io.Writer. Float values NaN and +-Infinity are printed as 0 since they are
 // invalid in DFM files. If the Object contains unicode characters the text will
 // be encoded as UTF-8 and start with the UTF-8 byte order mark.
-func (o Object) Write(w io.Writer) error {
+func (o *Object) Write(w io.Writer) error {
 	p := printer{}
 	if !onlyASCII(o) {
 		p.Write(utf8bom)
@@ -46,7 +46,7 @@ func (o Object) Write(w io.Writer) error {
 
 func onlyASCII(value PropertyValue) bool {
 	switch v := value.(type) {
-	case Object:
+	case *Object:
 		if !(isASCII(v.Name) && isASCII(v.Type)) {
 			return false
 		}
@@ -109,7 +109,7 @@ func (p *printer) decIndent() {
 	p.indent = p.indent[:len(p.indent)-2]
 }
 
-func (p *printer) object(o Object) {
+func (p *printer) object(o *Object) {
 	if o.Name == "" {
 		// Anonymous object.
 		p.write(p.indent, o.Kind.String(), " ", o.Type)
@@ -122,7 +122,7 @@ func (p *printer) object(o Object) {
 	p.WriteString("\r\n")
 	p.incIndent()
 	for _, prop := range o.Properties {
-		if obj, ok := prop.Value.(Object); ok {
+		if obj, ok := prop.Value.(*Object); ok {
 			p.object(obj)
 		} else {
 			p.property(prop)

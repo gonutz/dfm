@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func parse(code []rune) (Object, error) {
+func parse(code []rune) (*Object, error) {
 	return newParser(code).parseObject()
 }
 
@@ -22,9 +22,9 @@ type parser struct {
 	err             error
 }
 
-func (p *parser) parseObject() (Object, error) {
+func (p *parser) parseObject() (*Object, error) {
 	if p.err != nil {
-		return Object{}, p.err
+		return nil, p.err
 	}
 
 	var obj Object
@@ -57,7 +57,7 @@ func (p *parser) parseObject() (Object, error) {
 			obj.Index = int(i)
 		} else {
 			p.err = fmt.Errorf("object index must be integer but was %#v", index)
-			return obj, p.err
+			return nil, p.err
 		}
 		p.token(']')
 	}
@@ -69,7 +69,7 @@ func (p *parser) parseObject() (Object, error) {
 		}
 		obj.Properties = append(obj.Properties, p.parseProperty())
 	}
-	return obj, p.err
+	return &obj, p.err
 }
 
 func (p *parser) parseProperty() Property {

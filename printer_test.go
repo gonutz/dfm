@@ -20,7 +20,7 @@ func TestASCIIobjectsAreSavedWithoutBOM(t *testing.T) {
 	objs := []dfm.Object{
 		{Name: "a"},
 		{Type: "a"},
-		prop("_", dfm.Object{Name: "a"}),
+		prop("_", &dfm.Object{Name: "a"}),
 		prop("a", dfm.Int(0)),
 		prop("a", dfm.String("")),
 		prop("_", dfm.Identifier("a")),
@@ -43,7 +43,7 @@ func TestNonASCIIobjectsAreSavedWithBOM(t *testing.T) {
 	objs := []dfm.Object{
 		{Name: "ä"},
 		{Type: "ä"},
-		prop("_", dfm.Object{Name: "ä"}),
+		prop("_", &dfm.Object{Name: "ä"}),
 		prop("ä", dfm.Int(0)),
 		prop("ä", dfm.String("")),
 		prop("_", dfm.Identifier("ä")),
@@ -74,16 +74,16 @@ func TestPrintDFM(t *testing.T) {
 		Name: "Dialog",
 		Type: "TDialog",
 		Properties: []dfm.Property{
-			{Value: dfm.Object{
+			{Value: &dfm.Object{
 				Type: "TSubObject",
 				Kind: dfm.Inline,
 			}},
-			{Value: dfm.Object{
+			{Value: &dfm.Object{
 				Name: "Child",
 				Type: "TChild",
 				Kind: dfm.Inherited,
 			}},
-			{Value: dfm.Object{
+			{Value: &dfm.Object{
 				Name:     "IndexObject",
 				Type:     "TPanel",
 				HasIndex: true,
