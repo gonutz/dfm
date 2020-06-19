@@ -150,13 +150,13 @@ end`,
 			Name: "A",
 			Type: "TA",
 			Properties: []dfm.Property{
-				dfm.Property{
+				{
 					Name: "B",
 					Value: dfm.Object{
 						Name: "B",
 						Type: "TB",
 						Properties: []dfm.Property{
-							dfm.Property{Name: "Nested", Value: dfm.Bool(true)},
+							{Name: "Nested", Value: dfm.Bool(true)},
 						},
 					},
 				},
@@ -177,7 +177,7 @@ end`,
 			Name: "A",
 			Type: "TA",
 			Properties: []dfm.Property{
-				dfm.Property{
+				{
 					Name: "B",
 					Value: dfm.Object{
 						Name:       "B",
@@ -185,7 +185,7 @@ end`,
 						Properties: []dfm.Property{},
 					},
 				},
-				dfm.Property{
+				{
 					Name: "C",
 					Value: dfm.Object{
 						Name:       "C",
@@ -286,11 +286,11 @@ func TestParseItemLists(t *testing.T) {
 		dfm.Property{Name: "List", Value: dfm.Items{
 			[]dfm.Property{},
 			[]dfm.Property{
-				dfm.Property{Name: "Zero", Value: dfm.Int(0)},
+				{Name: "Zero", Value: dfm.Int(0)},
 			},
 			[]dfm.Property{
-				dfm.Property{Name: "One", Value: dfm.Int(1)},
-				dfm.Property{Name: "Two", Value: dfm.Int(2)},
+				{Name: "One", Value: dfm.Int(1)},
+				{Name: "Two", Value: dfm.Int(2)},
 			},
 		}},
 	)

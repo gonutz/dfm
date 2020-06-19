@@ -12,49 +12,26 @@ import (
 
 var utf8bom = []byte{0xEF, 0xBB, 0xBF}
 
+func prop(name string, value dfm.PropertyValue) dfm.Object {
+	return dfm.Object{Properties: []dfm.Property{{Name: name, Value: value}}}
+}
+
 func TestASCIIobjectsAreSavedWithoutBOM(t *testing.T) {
 	objs := []dfm.Object{
-		dfm.Object{Name: "a"},
-		dfm.Object{Type: "a"},
-		dfm.Object{Properties: []dfm.Property{
-			dfm.Property{Name: "_", Value: dfm.Object{Name: "a"}},
-		}},
-		dfm.Object{Properties: []dfm.Property{
-			dfm.Property{Name: "a", Value: dfm.Int(0)},
-		}},
-		dfm.Object{Properties: []dfm.Property{
-			dfm.Property{Name: "a", Value: dfm.String("")},
-		}},
-		dfm.Object{Properties: []dfm.Property{
-			dfm.Property{Name: "a", Value: dfm.String("döes nöt mättér")},
-		}},
-		dfm.Object{Properties: []dfm.Property{
-			dfm.Property{Name: "_", Value: dfm.Identifier("a")},
-		}},
-		dfm.Object{Properties: []dfm.Property{
-			dfm.Property{Name: "_", Value: dfm.Set{
-				dfm.Identifier("a"),
-			}},
-		}},
-		dfm.Object{Properties: []dfm.Property{
-			dfm.Property{Name: "_", Value: dfm.Tuple{
-				dfm.Identifier("a"),
-			}},
-		}},
-		dfm.Object{Properties: []dfm.Property{
-			dfm.Property{Name: "_", Value: dfm.Items{
-				[]dfm.Property{dfm.Property{
-					Name: "a", Value: dfm.Int(0),
-				}},
-			}},
-		}},
-		dfm.Object{Properties: []dfm.Property{
-			dfm.Property{Name: "_", Value: dfm.Items{
-				[]dfm.Property{dfm.Property{
-					Name: "_", Value: dfm.Identifier("a"),
-				}},
-			}},
-		}},
+		{Name: "a"},
+		{Type: "a"},
+		prop("_", dfm.Object{Name: "a"}),
+		prop("a", dfm.Int(0)),
+		prop("a", dfm.String("")),
+		prop("_", dfm.Identifier("a")),
+		prop("_", dfm.Set{dfm.Identifier("a")}),
+		prop("_", dfm.Tuple{dfm.Identifier("a")}),
+		prop("_", dfm.Items{[]dfm.Property{{Name: "a", Value: dfm.Int(0)}}}),
+		prop("_", dfm.Items{[]dfm.Property{{Value: dfm.Identifier("a")}}}),
+
+		// As long as the name is ASCII, the ä in the string literal does not
+		// make a difference, it will be escaped as a character literal.
+		prop("a", dfm.String("ä")),
 	}
 	for i, obj := range objs {
 		data := obj.Print()
@@ -64,44 +41,16 @@ func TestASCIIobjectsAreSavedWithoutBOM(t *testing.T) {
 
 func TestNonASCIIobjectsAreSavedWithBOM(t *testing.T) {
 	objs := []dfm.Object{
-		dfm.Object{Name: "ä"},
-		dfm.Object{Type: "ä"},
-		dfm.Object{Properties: []dfm.Property{
-			dfm.Property{Name: "_", Value: dfm.Object{Name: "ä"}},
-		}},
-		dfm.Object{Properties: []dfm.Property{
-			dfm.Property{Name: "ä", Value: dfm.Int(0)},
-		}},
-		dfm.Object{Properties: []dfm.Property{
-			dfm.Property{Name: "ä", Value: dfm.String("")},
-		}},
-		dfm.Object{Properties: []dfm.Property{
-			dfm.Property{Name: "_", Value: dfm.Identifier("ä")},
-		}},
-		dfm.Object{Properties: []dfm.Property{
-			dfm.Property{Name: "_", Value: dfm.Set{
-				dfm.Identifier("ä"),
-			}},
-		}},
-		dfm.Object{Properties: []dfm.Property{
-			dfm.Property{Name: "_", Value: dfm.Tuple{
-				dfm.Identifier("ä"),
-			}},
-		}},
-		dfm.Object{Properties: []dfm.Property{
-			dfm.Property{Name: "_", Value: dfm.Items{
-				[]dfm.Property{dfm.Property{
-					Name: "ä", Value: dfm.Int(0),
-				}},
-			}},
-		}},
-		dfm.Object{Properties: []dfm.Property{
-			dfm.Property{Name: "_", Value: dfm.Items{
-				[]dfm.Property{dfm.Property{
-					Name: "_", Value: dfm.Identifier("ä"),
-				}},
-			}},
-		}},
+		{Name: "ä"},
+		{Type: "ä"},
+		prop("_", dfm.Object{Name: "ä"}),
+		prop("ä", dfm.Int(0)),
+		prop("ä", dfm.String("")),
+		prop("_", dfm.Identifier("ä")),
+		prop("_", dfm.Set{dfm.Identifier("ä")}),
+		prop("_", dfm.Tuple{dfm.Identifier("ä")}),
+		prop("_", dfm.Items{[]dfm.Property{{Name: "ä", Value: dfm.Int(0)}}}),
+		prop("_", dfm.Items{[]dfm.Property{{Value: dfm.Identifier("ä")}}}),
 	}
 	for i, obj := range objs {
 		data := obj.Print()
@@ -125,102 +74,87 @@ func TestPrintDFM(t *testing.T) {
 		Name: "Dialog",
 		Type: "TDialog",
 		Properties: []dfm.Property{
-			dfm.Property{
-				Value: dfm.Object{
-					Type: "TSubObject",
-					Kind: dfm.Inline,
-				},
-			},
-			dfm.Property{
-				Value: dfm.Object{
-					Name: "Child",
-					Type: "TChild",
-					Kind: dfm.Inherited,
-				},
-			},
-			dfm.Property{
-				Value: dfm.Object{
-					Name:     "IndexObject",
-					Type:     "TPanel",
-					HasIndex: true,
-					Index:    123,
-				},
-			},
-			dfm.Property{Name: "Left", Value: dfm.Int(123)},
-			dfm.Property{Name: "Top", Value: dfm.Int(-123)},
-			dfm.Property{Name: "Scale", Value: dfm.Float(1.0)},
-			dfm.Property{Name: "F.G", Value: dfm.Float(-123.1875)},
-			dfm.Property{Name: "Precise", Value: dfm.Float(39043.36641510417)},
-			dfm.Property{Name: "Huge", Value: dfm.Float(1.000000040918479e35)},
-			dfm.Property{Name: "Decimal", Value: dfm.Float(1e+15)},
-			dfm.Property{Name: "UseE", Value: dfm.Float(1e+16)},
-			dfm.Property{Name: "Not.A.Number", Value: dfm.Float(math.NaN())},
-			dfm.Property{Name: "Infinity", Value: dfm.Float(math.Inf(+1))},
-			dfm.Property{Name: "NegativeInfinity", Value: dfm.Float(math.Inf(-1))},
-			dfm.Property{Name: "EmptyString", Value: dfm.String("")},
-			dfm.Property{Name: "S", Value: dfm.String("string")},
-			dfm.Property{Name: "Unicode1Line", Value: dfm.String(strings.Repeat("ä", 64))},
-			dfm.Property{Name: "Unicode2Lines", Value: dfm.String(strings.Repeat("ä", 65))},
-			dfm.Property{Name: "OneLine", Value: dfm.String(strings.Repeat("x", 64))},
-			dfm.Property{Name: "TwoLines", Value: dfm.String(strings.Repeat("x", 65))},
-			dfm.Property{Name: "Quoted", Value: dfm.String("The 'Laser'")},
-			dfm.Property{Name: "Control", Value: dfm.String("\t\r\n")},
-			dfm.Property{Name: "LongString", Value: dfm.String(`
+			{Value: dfm.Object{
+				Type: "TSubObject",
+				Kind: dfm.Inline,
+			}},
+			{Value: dfm.Object{
+				Name: "Child",
+				Type: "TChild",
+				Kind: dfm.Inherited,
+			}},
+			{Value: dfm.Object{
+				Name:     "IndexObject",
+				Type:     "TPanel",
+				HasIndex: true,
+				Index:    123,
+			}},
+			{Name: "Left", Value: dfm.Int(123)},
+			{Name: "Top", Value: dfm.Int(-123)},
+			{Name: "Scale", Value: dfm.Float(1.0)},
+			{Name: "F.G", Value: dfm.Float(-123.1875)},
+			{Name: "Precise", Value: dfm.Float(39043.36641510417)},
+			{Name: "Huge", Value: dfm.Float(1.000000040918479e35)},
+			{Name: "Decimal", Value: dfm.Float(1e+15)},
+			{Name: "UseE", Value: dfm.Float(1e+16)},
+			{Name: "Not.A.Number", Value: dfm.Float(math.NaN())},
+			{Name: "Infinity", Value: dfm.Float(math.Inf(+1))},
+			{Name: "NegativeInfinity", Value: dfm.Float(math.Inf(-1))},
+			{Name: "EmptyString", Value: dfm.String("")},
+			{Name: "S", Value: dfm.String("string")},
+			{Name: "Unicode1Line", Value: dfm.String(strings.Repeat("ä", 64))},
+			{Name: "Unicode2Lines", Value: dfm.String(strings.Repeat("ä", 65))},
+			{Name: "OneLine", Value: dfm.String(strings.Repeat("x", 64))},
+			{Name: "TwoLines", Value: dfm.String(strings.Repeat("x", 65))},
+			{Name: "Quoted", Value: dfm.String("The 'Laser'")},
+			{Name: "Control", Value: dfm.String("\t\r\n")},
+			{Name: "LongString", Value: dfm.String(`
 				A long string with four tabs at the start of each line.
 				The string starts with a line break and ends with a line break,
 				followed by some more tabs.
 			`)},
-			dfm.Property{Name: "Yes", Value: dfm.Bool(true)},
-			dfm.Property{Name: "No", Value: dfm.Bool(false)},
-			dfm.Property{Name: "ID", Value: dfm.Identifier("clColor")},
-			dfm.Property{Name: "ID.With.Dots", Value: dfm.Identifier("A.B.C")},
-			dfm.Property{Name: "EmptySet", Value: dfm.Set{}},
-			dfm.Property{Name: "Left", Value: dfm.Set{
+			{Name: "Yes", Value: dfm.Bool(true)},
+			{Name: "No", Value: dfm.Bool(false)},
+			{Name: "ID", Value: dfm.Identifier("clColor")},
+			{Name: "ID.With.Dots", Value: dfm.Identifier("A.B.C")},
+			{Name: "EmptySet", Value: dfm.Set{}},
+			{Name: "Left", Value: dfm.Set{
 				dfm.Identifier("akLeft"),
 			}},
-			dfm.Property{Name: "TopLeft", Value: dfm.Set{
+			{Name: "TopLeft", Value: dfm.Set{
 				dfm.Identifier("akLeft"),
 				dfm.Identifier("akTop"),
 			}},
-			dfm.Property{Name: "EmptyTuple", Value: dfm.Tuple{}},
-			dfm.Property{Name: "One", Value: dfm.Tuple{
-				dfm.Int(1),
-			}},
-			dfm.Property{Name: "OneTwo", Value: dfm.Tuple{
-				dfm.Int(1),
-				dfm.Int(2),
-			}},
-			dfm.Property{Name: "StringTuple", Value: dfm.Tuple{
+			{Name: "EmptyTuple", Value: dfm.Tuple{}},
+			{Name: "One", Value: dfm.Tuple{dfm.Int(1)}},
+			{Name: "OneTwo", Value: dfm.Tuple{dfm.Int(1), dfm.Int(2)}},
+			{Name: "StringTuple", Value: dfm.Tuple{
 				dfm.String(strings.Repeat("a", 10)),
 				dfm.String(strings.Repeat("b", 100)),
 				dfm.String(strings.Repeat("c", 5)),
 			}},
-			dfm.Property{Name: "EmptyBytes", Value: dfm.Bytes{}},
-			dfm.Property{Name: "OneByte", Value: dfm.Bytes{0xAF}},
-			dfm.Property{
-				Name: "ManyBytes",
-				Value: dfm.Bytes(bytes.Repeat([]byte{
-					0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF,
-				}, 10)),
-			},
-			dfm.Property{Name: "EmptyItems", Value: dfm.Items{}},
-			dfm.Property{Name: "OneEmptyItem", Value: dfm.Items{
+			{Name: "EmptyBytes", Value: dfm.Bytes{}},
+			{Name: "OneByte", Value: dfm.Bytes{0xAF}},
+			{Name: "ManyBytes", Value: dfm.Bytes(bytes.Repeat([]byte{
+				0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF}, 10))},
+			{Name: "EmptyItems", Value: dfm.Items{}},
+			{Name: "OneEmptyItem", Value: dfm.Items{
 				[]dfm.Property{},
 			}},
-			dfm.Property{Name: "TwoEmptyItems", Value: dfm.Items{
+			{Name: "TwoEmptyItems", Value: dfm.Items{
 				[]dfm.Property{},
 				[]dfm.Property{},
 			}},
-			dfm.Property{Name: "OneItem", Value: dfm.Items{
+			{Name: "OneItem", Value: dfm.Items{
 				[]dfm.Property{
-					dfm.Property{Name: "Left", Value: dfm.Int(5)},
+					{Name: "Left", Value: dfm.Int(5)},
 				},
 			}},
-			dfm.Property{Name: "NestedItems", Value: dfm.Items{
+			{Name: "NestedItems", Value: dfm.Items{
 				[]dfm.Property{
-					dfm.Property{Name: "Nested", Value: dfm.Items{
+					{Name: "Nested", Value: dfm.Items{
 						[]dfm.Property{
-							dfm.Property{Name: "Left", Value: dfm.Int(5)},
+							{Name: "Left", Value: dfm.Int(5)},
 						},
 					}},
 				},
