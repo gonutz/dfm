@@ -16,7 +16,7 @@ func ParseReader(r io.Reader) (Object, error) {
 	return ParseBytes(code)
 }
 
-// ParseReader parses one object read from the given file. See ParseBytes.
+// ParseFile parses one object read from the given file. See ParseBytes.
 func ParseFile(path string) (Object, error) {
 	code, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -37,7 +37,7 @@ func ParseBytes(code []byte) (Object, error) {
 	return parse(bytes.Runes(bytes.TrimPrefix(code, utf8bom)))
 }
 
-// ParseReader parses one object read from the given file. See ParseBytes. The
+// ParseString parses one object read from the given file. See ParseBytes. The
 // code must not start with a UTF-8 byte oder mark.
 func ParseString(code string) (Object, error) {
 	return parse([]rune(code))
