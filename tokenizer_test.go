@@ -78,6 +78,7 @@ end`,
 		tok('>', ">"),
 		tok(tokenWhiteSpace, "\n"),
 		tok(tokenWord, "end"),
+		tok(tokenEOF, ""),
 	)
 }
 
@@ -85,7 +86,7 @@ func TestTokenPositions(t *testing.T) {
 	tokens := tokenize(`object X
   Left
 end`)
-	check.Eq(t, len(tokens), 7)
+	check.Eq(t, len(tokens), 8)
 	check.Eq(t, tokens[0], token{
 		tokenType: tokenWord,
 		text:      "object",
@@ -128,6 +129,12 @@ end`)
 		line:      3,
 		col:       1,
 	})
+	check.Eq(t, tokens[7], token{
+		tokenType: tokenEOF,
+		text:      "",
+		line:      3,
+		col:       4,
+	})
 }
 
 func tok(typ tokenType, text string) token {
@@ -154,9 +161,9 @@ func tokenize(code string) []token {
 	lex := newTokenizer([]rune(code))
 	var tokens []token
 	for {
-		if t := lex.next(); t.tokenType != tokenEOF {
-			tokens = append(tokens, t)
-		} else {
+		t := lex.next()
+		tokens = append(tokens, t)
+		if t.tokenType == tokenEOF {
 			break
 		}
 	}

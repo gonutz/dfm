@@ -20,18 +20,17 @@ type tokenizer struct {
 func (t *tokenizer) next() token {
 	haveType := tokenIllegal
 	start := t.cur
+	line, col := t.line, t.col
 
 	digit := func(r rune) bool {
 		return '0' <= r && r <= '9'
 	}
 
-	line, col := t.line, t.col
 	r := t.currentRune()
 	switch r {
 	case 0:
 		return token{
 			tokenType: tokenEOF,
-			text:      "end of file",
 			line:      line,
 			col:       col,
 		}
