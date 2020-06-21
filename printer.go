@@ -26,7 +26,7 @@ func (o Object) String() string {
 // encoded as UTF-8 and start with the UTF-8 byte order mark.
 func (o Object) Print() []byte {
 	var buf bytes.Buffer
-	o.Write(&buf)
+	o.WriteTo(&buf)
 	return buf.Bytes()
 }
 
@@ -34,7 +34,7 @@ func (o Object) Print() []byte {
 // io.Writer. Float values NaN and +-Infinity are printed as 0 since they are
 // invalid in DFM files. If the Object contains unicode characters the text will
 // be encoded as UTF-8 and start with the UTF-8 byte order mark.
-func (o *Object) Write(w io.Writer) error {
+func (o *Object) WriteTo(w io.Writer) error {
 	p := printer{}
 	if !onlyASCII(o) {
 		p.Write(utf8bom)
