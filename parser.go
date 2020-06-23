@@ -82,7 +82,6 @@ func (p *parser) parseProperty() Property {
 			return prop
 		}
 		prop.Name = child.Name
-		prop.Name = child.Name
 		prop.Value = child
 	} else {
 		prop.Name = p.identifier("property name")
