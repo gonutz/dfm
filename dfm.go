@@ -97,8 +97,8 @@ func (k ObjectKind) String() string {
 //
 //     <name> = <value>
 //
-// where Name can contain dot, e.g. Font.Height.
-// In case the Value is an Object, the Name is a copy of the Object.Name.
+// where Name can contain dots, e.g. Font.Height.
+// In case the Value is an Object, the Name is the same as the Object.Name.
 type Property struct {
 	Name  string
 	Value PropertyValue
@@ -109,13 +109,11 @@ type PropertyValue interface {
 	isPropertyValue()
 }
 
-// Int is a decimal integer literal.
+// Int is a base 10 integer literal.
 type Int int
 
-// Float is a floating point number, represented using a decimal point, i.e.
-// rather than using the scientific notations like 2.3E-4 it is written like a
-// human, e.g. 0.000234. Float values of NaN and +-Infinity will be printed as
-// 0 since DFMs do not allow them.
+// Float is a floating point number, e.g. 1.23 or 4.5E-6. Float values of NaN
+// and +-Infinity will be printed as 0 since DFMs do not allow them.
 type Float float64
 
 // Bool is either True or False.
@@ -126,7 +124,7 @@ type Bool bool
 //
 //     'a ''quoted'' string like this'#13#10
 //
-// but this string literal in Go is really this:
+// for which the value of the Go string will be:
 //
 //     "a 'quoted' string like this\r\n"
 type String string
@@ -139,12 +137,12 @@ type Identifier string
 //     [akLeft, akTop, akRight]
 type Set []PropertyValue
 
-// Tuple is a tuple of values in parentheses like
+// Tuple is a tuple of values in parentheses, e.g.:
 //
 //     (123 456 789)
 type Tuple []PropertyValue
 
-// Items is a list of property lists (2D list of properies) like
+// Items is a list of property lists (2D list of properies), e.g.:
 //
 //     <
 //       item
@@ -157,7 +155,7 @@ type Tuple []PropertyValue
 //       end>
 type Items [][]Property
 
-// Bytes is a in list of hexadecimal data in braces like
+// Bytes is a in list of hexadecimal data in braces, e.g.:
 //
 //     { FFAC2938AA991234A }
 type Bytes []byte
