@@ -155,7 +155,7 @@ type Tuple []PropertyValue
 //       end>
 type Items [][]Property
 
-// Bytes is a in list of hexadecimal data in braces, e.g.:
+// Bytes is a list of hexadecimal binary data in braces, e.g.:
 //
 //     { FFAC2938AA991234A }
 type Bytes []byte
