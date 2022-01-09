@@ -194,9 +194,11 @@ func (p *parser) parseValue() PropertyValue {
 				p.nextToken()
 				break
 			}
-			if p.peeksAt(',') {
-				p.nextToken()
+
+			if len(set) > 0 {
+				p.token(',')
 			}
+
 			set = append(set, p.parseValue())
 		}
 		return set
@@ -258,7 +260,7 @@ func (p *parser) parseValue() PropertyValue {
 		for !p.peeksAt('>') && p.err == nil {
 			p.word("item")
 			var item []Property
-			for !p.peekWord("end") {
+			for !p.peekWord("end") && p.err == nil {
 				item = append(item, p.parseProperty())
 			}
 			p.word("end")
