@@ -38,6 +38,8 @@ func (p *parser) parseObject() (*Object, error) {
 	} else if p.peekWord("inline") {
 		p.word("inline")
 		obj.Kind = Inline
+	} else {
+		p.err = errors.New("object start expected (object, inherited or inline)")
 	}
 
 	nameOrType := p.identifier("object name (or type for anonymous objects)")

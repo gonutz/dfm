@@ -36,3 +36,8 @@ func TestInvalidIntegerInSet(t *testing.T) {
 end`)
 	check.Neq(t, err, nil)
 }
+
+func TestInvalidObject(t *testing.T) {
+	_, err := dfm.ParseString("Invalid")
+	check.Neq(t, err, nil)
+}
