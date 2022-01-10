@@ -331,6 +331,15 @@ end`,
 	)
 }
 
+func TestNonASCIIBytesAreInterpretedAsWindowsANSI(t *testing.T) {
+	code := []byte("object O A='\xA9' end") // 0xA9 is the ANSI copyright symbol
+	obj, err := dfm.ParseBytes(code)
+	check.Eq(t, err, nil)
+	check.Eq(t, obj, &dfm.Object{Type: "O", Properties: []dfm.Property{
+		{Name: "A", Value: dfm.String("©")},
+	}})
+}
+
 func parseObject(t *testing.T, code string, want *dfm.Object) {
 	t.Helper()
 	obj, err := dfm.ParseString(code)

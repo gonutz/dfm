@@ -33,8 +33,11 @@ func ParseFile(path string) (*Object, error) {
 func ParseBytes(code []byte) (*Object, error) {
 	if len(code) > 0 && code[0] == 0xFF {
 		return nil, errors.New("dfm.Parse: binary DFM files are not supported")
+	} else if bytes.HasPrefix(code, utf8bom) || allASCII(code) {
+		return parse(bytes.Runes(bytes.TrimPrefix(code, utf8bom)))
+	} else {
+		return parse(decodeWindowsANSI(code))
 	}
-	return parse(bytes.Runes(bytes.TrimPrefix(code, utf8bom)))
 }
 
 // ParseString parses one object read from the given file. See ParseBytes. The
